@@ -102,6 +102,33 @@ def get_annualized_submissions(subreddit, end_date, ini_date = None):
     return sub_df_all
 
 
-def clean_data(dataframe):
-    cols = dataframe.columns
-    print(f"the dataset currently has {cols.shape} columns")
+def clean_reddit_data(dataframe):
+    n_cols = dataframe.shape
+    
+    # selct only the columns needed for ts and nlp
+
+    df = dataframe[["author", "contest_mode", "created_utc", "domain", "id", 
+                                        "num_comments", "num_crossposts", "removed_by_category", 
+                                        "score", "selftext", "subreddit", "subreddit_subscribers", 
+                                        "title", "total_awards_received", "upvote_ratio"]]
+
+    # scour for and remove entries removed by moderators
+    unwanted = ["moderator", "reddit", "automod_filtered", "content_takedown"]
+    df = df[~df['removed_by_category'].isin(unwanted)] 
+
+    # drop contests
+    df.drop(df.index[df['contest_mode'] == True], inplace=True)
+
+    # drop columns used to clean up data
+    df = df.drop(columns = ['removed_by_category',"contest_mode"])
+
+    print(f"the dataset initially had {n_cols[1]} columns and {n_cols[0]} rows")
+    print(f"Now we have {df.shape[1]} columns and {df.shape[0]} rows \n bit better innit?")
+
+    return df
+
+     
+
+
+
+    
